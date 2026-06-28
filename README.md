@@ -1,6 +1,6 @@
 # companion-module-bpm2osc
 
-[Bitfocus Companion](https://bitfocus.io/companion) module for [BPM2OSC](https://github.com/fblab-it/bpm2osc) — real-time BPM detection control and monitoring from your Companion surface.
+[Bitfocus Companion](https://bitfocus.io/companion) module for **BPM2OSC** — real-time BPM detection control and monitoring from your Companion surface.
 
 Connects to the BPM2OSC web server via SSE (Server-Sent Events) and REST API. State updates arrive at up to 50 Hz; all controls respond immediately.
 

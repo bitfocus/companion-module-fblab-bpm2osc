@@ -8,9 +8,7 @@
   "manufacturer": "FBLab",
   "products": ["BPM2OSC"],
   "keywords": ["bpm", "audio", "beat", "music", "osc", "tempo"],
-  "bugs": { "url": "https://github.com/fblab-it/bpm2osc/issues" },
-  "repository": { "type": "git", "url": "https://github.com/fblab-it/bpm2osc" },
-  "license": "MIT",
+"license": "MIT",
   "runtime": "nodejs18",
   "entrypoint": "dist/main.js"
 }
