@@ -7,17 +7,19 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "build:watch": "tsc -p tsconfig.json --watch",
-    "dev": "tsc -p tsconfig.json --watch"
+    "dev": "tsc -p tsconfig.json --watch",
+    "package": "companion-module-build"
   },
   "dependencies": {
     "@companion-module/base": "^2.1.0",
     "eventsource": "^3.0.2"
   },
   "devDependencies": {
+    "@companion-module/tools": "^2.0.0",
     "@types/node": "^18.0.0",
     "typescript": "^5.4.0"
   },
   "engines": {
-    "node": ">=18"
+    "node": "^22.20"
   }
 }
