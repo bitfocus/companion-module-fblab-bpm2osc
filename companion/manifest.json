@@ -8,6 +8,7 @@
   "manufacturer": "FBLab",
   "products": ["BPM2OSC"],
   "keywords": ["bpm", "audio", "beat", "music", "osc", "tempo"],
+  "legacyIds": [],
   "license": "MIT",
   "runtime": { "type": "node22" },
   "entrypoint": "dist/main.js"
