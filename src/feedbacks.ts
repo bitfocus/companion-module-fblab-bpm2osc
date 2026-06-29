@@ -1,5 +1,5 @@
 import { combineRgb } from '@companion-module/base'
-import type BPM2OSCInstance from './main.js'
+import type { BPM2OSCInstance } from './main.js'
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function getFeedbackDefinitions(instance: BPM2OSCInstance) {
@@ -60,6 +60,14 @@ export function getFeedbackDefinitions(instance: BPM2OSCInstance) {
       callback: (feedback: { options: Record<string, unknown> }) =>
         instance.state.preset === String(feedback.options['preset'] ?? ''),
     },
+    beat_one: {
+      name: 'Beat 1 (downbeat)',
+      description: 'True on beat 1 of the bar',
+      type: 'boolean' as const,
+      defaultStyle: { bgcolor: combineRgb(200, 40, 40), color: combineRgb(255, 255, 255) },
+      options: [],
+      callback: () => instance.state.bar_beat === 0,
+    },
     confidence_above: {
       name: 'Confidence Above Threshold',
       description: 'Highlights when detection confidence exceeds a given percentage',
@@ -78,5 +86,5 @@ export function getFeedbackDefinitions(instance: BPM2OSCInstance) {
       callback: (feedback: { options: Record<string, unknown> }) =>
         Math.round(instance.state.conf * 100) >= Number(feedback.options['threshold'] ?? 70),
     },
-  } as const
+  }
 }

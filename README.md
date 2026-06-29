@@ -8,8 +8,8 @@ Connects to the BPM2OSC web server via SSE (Server-Sent Events) and REST API. St
 
 ## Requirements
 
-- **BPM2OSC** v1.0.0 or later (web server must be enabled in Settings → Web Server)
-- **Bitfocus Companion** v3.x
+- **BPM2OSC** v2.6.3 or later (web server must be enabled in Settings → Web Server)
+- **Bitfocus Companion** v4.3
 - Node.js 18+ (handled automatically by Companion)
 
 ---

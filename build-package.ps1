@@ -10,9 +10,14 @@ $toolsDir   = "$moduleDir\node_modules\@companion-module\tools"
 $webpack    = "$moduleDir\node_modules\.bin\webpack-cli.cmd"
 $webpackCfg = "$toolsDir\webpack.config.cjs"
 
-# ── 1. Clean pkg/ ─────────────────────────────────────────────────────────────
-if (Test-Path "$moduleDir\pkg") { Remove-Item "$moduleDir\pkg" -Recurse -Force }
-New-Item "$moduleDir\pkg" -ItemType Directory | Out-Null
+# ── 1. Clean pkg/ (best-effort — skip if locked by Companion) ─────────────────
+if (Test-Path "$moduleDir\pkg") {
+    Remove-Item "$moduleDir\pkg" -Recurse -Force -ErrorAction SilentlyContinue
+}
+if (-not (Test-Path "$moduleDir\pkg")) {
+    New-Item "$moduleDir\pkg" -ItemType Directory | Out-Null
+}
+New-Item "$moduleDir\pkg\companion" -ItemType Directory -Force | Out-Null
 
 # ── 2. Webpack bundle ──────────────────────────────────────────────────────────
 Write-Host "Running webpack..."

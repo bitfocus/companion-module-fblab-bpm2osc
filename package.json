@@ -11,7 +11,7 @@
     "package": "companion-module-build"
   },
   "dependencies": {
-    "@companion-module/base": "^2.1.0",
+    "@companion-module/base": "^1.14.1",
     "eventsource": "^3.0.2"
   },
   "devDependencies": {

@@ -5,11 +5,19 @@
   "description": "Real-time BPM detection — control and monitor BPM2OSC via Bitfocus Companion.",
   "version": "1.0.0",
   "category": "utility",
-  "manufacturer": "FBLab",
+  "manufacturer": "FBLab.it",
   "products": ["BPM2OSC"],
   "keywords": ["bpm", "audio", "beat", "music", "osc", "tempo"],
   "legacyIds": [],
   "license": "MIT",
-  "runtime": { "type": "node22" },
-  "entrypoint": "dist/main.js"
+  "repository": "https://github.com/djbx83/companion-module-bpm2osc",
+  "bugs": "https://github.com/djbx83/companion-module-bpm2osc/issues",
+  "maintainers": [{ "name": "Fabrizio Borelli", "email": "info@fblab.it" }],
+  "runtime": {
+    "type": "node22",
+    "api": "nodejs-ipc",
+    "apiVersion": "1.14.1",
+    "entrypoint": "../pkg/main.js"
+  },
+  "isPrerelease": false
 }

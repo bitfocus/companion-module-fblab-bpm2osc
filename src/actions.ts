@@ -1,4 +1,4 @@
-import type BPM2OSCInstance from './main.js'
+import type { BPM2OSCInstance } from './main.js'
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function getActionDefinitions(instance: BPM2OSCInstance) {
@@ -58,5 +58,5 @@ export function getActionDefinitions(instance: BPM2OSCInstance) {
         if (name) await instance.postCmd(`preset/${encodeURIComponent(name)}`)
       },
     },
-  } as const
+  }
 }

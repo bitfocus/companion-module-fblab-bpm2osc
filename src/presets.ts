@@ -1,5 +1,4 @@
-import { combineRgb } from '@companion-module/base'
-import type { CompanionPresetDefinitions, CompanionPresetSection, InstanceTypes } from '@companion-module/base'
+import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
 
 const white = combineRgb(255, 255, 255)
 const black = combineRgb(0, 0, 0)
@@ -7,12 +6,12 @@ const blue  = combineRgb(15, 52, 96)
 const green = combineRgb(0, 180, 0)
 const red   = combineRgb(200, 40, 40)
 
-// Preset definitions — typed loosely so the compiler doesn't need the full TManifest
-export const PRESET_DEFS: CompanionPresetDefinitions = {
+const BASE_PRESETS: CompanionPresetDefinitions = {
   start_stop: {
-    type: 'simple',
-    name: 'Start / Stop (shows BPM)',
-    style: { text: '$(bpm2osc:bpm)\nBPM', size: '18', color: white, bgcolor: black },
+    type: 'button',
+    category: 'Controls',
+    name: 'Start / Stop',
+    style: { text: 'START\nSTOP', size: '18', color: white, bgcolor: black },
     steps: [{ down: [{ actionId: 'toggle', options: {} }], up: [] }],
     feedbacks: [
       { feedbackId: 'running', options: {}, style: { bgcolor: green } },
@@ -20,14 +19,16 @@ export const PRESET_DEFS: CompanionPresetDefinitions = {
     ],
   },
   resync: {
-    type: 'simple',
+    type: 'button',
+    category: 'Controls',
     name: 'Resync Beat',
     style: { text: 'RESYNC', size: '18', color: white, bgcolor: blue },
     steps: [{ down: [{ actionId: 'resync', options: {} }], up: [] }],
     feedbacks: [],
   },
   lock: {
-    type: 'simple',
+    type: 'button',
+    category: 'Controls',
     name: 'Lock BPM',
     style: { text: 'LOCK', size: '18', color: white, bgcolor: black },
     steps: [{ down: [{ actionId: 'lock', options: {} }], up: [] }],
@@ -37,35 +38,40 @@ export const PRESET_DEFS: CompanionPresetDefinitions = {
     ],
   },
   div2: {
-    type: 'simple',
+    type: 'button',
+    category: 'Controls',
     name: 'BPM ÷2',
     style: { text: '÷2', size: '24', color: white, bgcolor: blue },
     steps: [{ down: [{ actionId: 'div2', options: {} }], up: [] }],
     feedbacks: [{ feedbackId: 'factor_active', options: {}, style: { bgcolor: red } }],
   },
   mul2: {
-    type: 'simple',
+    type: 'button',
+    category: 'Controls',
     name: 'BPM ×2',
     style: { text: '×2', size: '24', color: white, bgcolor: blue },
     steps: [{ down: [{ actionId: 'mul2', options: {} }], up: [] }],
     feedbacks: [{ feedbackId: 'factor_active', options: {}, style: { bgcolor: red } }],
   },
   tap: {
-    type: 'simple',
+    type: 'button',
+    category: 'Controls',
     name: 'Tap Tempo',
     style: { text: 'TAP', size: '24', color: white, bgcolor: blue },
     steps: [{ down: [{ actionId: 'tap', options: {} }], up: [] }],
     feedbacks: [],
   },
   bpm_display: {
-    type: 'simple',
-    name: 'BPM Display',
+    type: 'button',
+    category: 'Display',
+    name: 'BPM Display (tap on press)',
     style: { text: '$(bpm2osc:bpm)\n$(bpm2osc:factor)', size: '18', color: white, bgcolor: blue },
-    steps: [],
+    steps: [{ down: [{ actionId: 'tap', options: {} }], up: [] }],
     feedbacks: [{ feedbackId: 'running', options: {}, style: { bgcolor: combineRgb(0, 60, 40) } }],
   },
   confidence: {
-    type: 'simple',
+    type: 'button',
+    category: 'Display',
     name: 'Confidence',
     style: { text: 'CONF\n$(bpm2osc:confidence)', size: '14', color: white, bgcolor: blue },
     steps: [],
@@ -74,39 +80,46 @@ export const PRESET_DEFS: CompanionPresetDefinitions = {
     ],
   },
   preset_display: {
-    type: 'simple',
+    type: 'button',
+    category: 'Display',
     name: 'Active Preset',
     style: { text: '$(bpm2osc:preset)', size: '14', color: white, bgcolor: blue },
     steps: [],
     feedbacks: [],
   },
   bar_beat: {
-    type: 'simple',
+    type: 'button',
+    category: 'Display',
     name: 'Bar Beat Counter',
-    style: { text: 'BEAT\n$(bpm2osc:bar_beat)', size: '18', color: white, bgcolor: blue },
+    style: { text: 'BEAT\n$(bpm2osc:bar_beat)', size: '18', color: white, bgcolor: black },
     steps: [{ down: [{ actionId: 'resync', options: {} }], up: [] }],
-    feedbacks: [],
+    feedbacks: [
+      { feedbackId: 'running',  options: {}, style: { bgcolor: green } },
+      { feedbackId: 'beat_one', options: {}, style: { bgcolor: red } },
+    ],
   },
 }
 
-// Preset section structure (one section, one group with all presets)
-export const PRESET_STRUCTURE: CompanionPresetSection<InstanceTypes>[] = [
-  {
-    id: 'bpm2osc',
-    name: 'BPM2OSC',
-    definitions: [
-      {
-        id: 'controls',
-        type: 'simple',
-        name: 'Controls',
-        presets: ['start_stop', 'resync', 'lock', 'div2', 'mul2', 'tap'],
-      },
-      {
-        id: 'display',
-        type: 'simple',
-        name: 'Display',
-        presets: ['bpm_display', 'confidence', 'preset_display', 'bar_beat'],
-      },
-    ],
-  },
-]
+export function generatePresets(presetNames: string[]): CompanionPresetDefinitions {
+  const defs: CompanionPresetDefinitions = { ...BASE_PRESETS }
+
+  for (const name of presetNames) {
+    const key = `preset__${name.replace(/[^a-zA-Z0-9]/g, '_')}`
+    defs[key] = {
+      type: 'button',
+      category: 'Presets',
+      name,
+      style: { text: name, size: '14', color: white, bgcolor: blue },
+      steps: [{ down: [{ actionId: 'preset', options: { name } }], up: [] }],
+      feedbacks: [
+        {
+          feedbackId: 'preset_active',
+          options: { preset: name },
+          style: { bgcolor: green, color: white },
+        },
+      ],
+    }
+  }
+
+  return defs
+}

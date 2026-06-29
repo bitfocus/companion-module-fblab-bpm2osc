@@ -1,30 +1,31 @@
 import {
   InstanceBase,
   InstanceStatus,
+  runEntrypoint,
   type SomeCompanionConfigField,
 } from '@companion-module/base'
+import { request as httpRequest } from 'http'
 import { EventSource } from 'eventsource'
-import { getActionDefinitions }         from './actions.js'
-import { getFeedbackDefinitions }       from './feedbacks.js'
+import { getActionDefinitions }           from './actions.js'
+import { getFeedbackDefinitions }         from './feedbacks.js'
 import { VARIABLE_DEFS, updateVariables } from './variables.js'
-import { PRESET_DEFS, PRESET_STRUCTURE } from './presets.js'
+import { generatePresets }                from './presets.js'
 import { type Config, type BPM2OSCState, DEFAULT_STATE } from './types.js'
 
-export default class BPM2OSCInstance extends InstanceBase {
+export class BPM2OSCInstance extends InstanceBase<Config> {
   config: Config = { host: '127.0.0.1', port: 5000 }
   state: BPM2OSCState = { ...DEFAULT_STATE }
 
   private _es: EventSource | null = null
   private _reconnectTimer: ReturnType<typeof setTimeout> | null = null
+  private _lastPresets: string[] = []
 
-  async init(rawConfig: Record<string, unknown>): Promise<void> {
-    this.config = rawConfig as unknown as Config
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.setActionDefinitions(getActionDefinitions(this) as any)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.setFeedbackDefinitions(getFeedbackDefinitions(this) as any)
+  async init(config: Config, _isFirstInit: boolean): Promise<void> {
+    this.config = config
+    this.setActionDefinitions(getActionDefinitions(this))
+    this.setFeedbackDefinitions(getFeedbackDefinitions(this))
     this.setVariableDefinitions(VARIABLE_DEFS)
-    this.setPresetDefinitions(PRESET_STRUCTURE, PRESET_DEFS)
+    this.setPresetDefinitions(generatePresets([]))
     updateVariables(this)
     this._connectSSE()
   }
@@ -33,8 +34,8 @@ export default class BPM2OSCInstance extends InstanceBase {
     this._disconnect()
   }
 
-  async configUpdated(rawConfig: Record<string, unknown>): Promise<void> {
-    this.config = rawConfig as unknown as Config
+  async configUpdated(config: Config): Promise<void> {
+    this.config = config
     this._disconnect()
     this._connectSSE()
   }
@@ -67,12 +68,29 @@ export default class BPM2OSCInstance extends InstanceBase {
   }
 
   async postCmd(path: string): Promise<void> {
-    try {
-      const res = await fetch(`${this.baseUrl()}/api/${path}`, { method: 'POST' })
-      if (!res.ok) this.log('warn', `POST /api/${path} → ${res.status}`)
-    } catch (e) {
-      this.log('error', `POST /api/${path} failed: ${e}`)
-    }
+    return new Promise((resolve) => {
+      const req = httpRequest(
+        {
+          hostname: this.config.host,
+          port:     this.config.port,
+          path:     `/api/${path}`,
+          method:   'POST',
+          headers:  { 'Content-Length': '0' },
+        },
+        (res) => {
+          if (res.statusCode !== undefined && res.statusCode >= 400) {
+            this.log('warn', `POST /api/${path} → ${res.statusCode}`)
+          }
+          res.resume()
+          resolve()
+        }
+      )
+      req.on('error', (e) => {
+        this.log('error', `POST /api/${path} failed: ${e.message}`)
+        resolve()
+      })
+      req.end()
+    })
   }
 
   private _connectSSE(): void {
@@ -95,7 +113,14 @@ export default class BPM2OSCInstance extends InstanceBase {
       try {
         this.state = JSON.parse(e.data as string) as BPM2OSCState
         updateVariables(this)
-        this.checkAllFeedbacks()
+
+        const newPresets = this.state.presets ?? []
+        if (JSON.stringify(newPresets) !== JSON.stringify(this._lastPresets)) {
+          this._lastPresets = [...newPresets]
+          this.setPresetDefinitions(generatePresets(this._lastPresets))
+        }
+
+        this.checkFeedbacks('running', 'stopped', 'locked', 'auto_locked', 'factor_active', 'preset_active', 'confidence_above', 'beat_one')
       } catch (err) {
         this.log('warn', `SSE parse error: ${err}`)
       }
@@ -125,3 +150,5 @@ export default class BPM2OSCInstance extends InstanceBase {
     }
   }
 }
+
+runEntrypoint(BPM2OSCInstance, [])
