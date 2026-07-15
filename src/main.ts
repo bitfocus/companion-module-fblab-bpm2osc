@@ -89,6 +89,9 @@ export class BPM2OSCInstance extends InstanceBase<Config> {
         this.log('error', `POST /api/${path} failed: ${e.message}`)
         resolve()
       })
+      req.setTimeout(5000, () => {
+        req.destroy(new Error('timeout'))
+      })
       req.end()
     })
   }

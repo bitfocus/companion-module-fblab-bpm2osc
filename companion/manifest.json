@@ -3,7 +3,7 @@
   "name": "BPM2OSC",
   "shortname": "BPM2OSC",
   "description": "Real-time BPM detection — control and monitor BPM2OSC via Bitfocus Companion.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "category": "utility",
   "manufacturer": "FBLab.it",
   "products": ["BPM2OSC"],

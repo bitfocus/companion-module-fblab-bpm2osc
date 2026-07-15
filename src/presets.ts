@@ -100,16 +100,33 @@ const BASE_PRESETS: CompanionPresetDefinitions = {
   },
 }
 
+// Companion interpolates "$(connection:variable)" in button text — a preset
+// named that way would otherwise have its literal name replaced by a variable
+// lookup. Breaking up the "$(" sequence with a zero-width space keeps the
+// name visually intact while making it inert.
+function escapeVariableSyntax(text: string): string {
+  return text.replace(/\$\(/g, '$​(')
+}
+
 export function generatePresets(presetNames: string[]): CompanionPresetDefinitions {
   const defs: CompanionPresetDefinitions = { ...BASE_PRESETS }
+  const usedKeys = new Set<string>()
 
   for (const name of presetNames) {
-    const key = `preset__${name.replace(/[^a-zA-Z0-9]/g, '_')}`
+    const base = `preset__${name.replace(/[^a-zA-Z0-9]/g, '_')}`
+    let key = base
+    let n = 2
+    while (usedKeys.has(key)) {
+      key = `${base}__${n}`
+      n++
+    }
+    usedKeys.add(key)
+
     defs[key] = {
       type: 'button',
       category: 'Presets',
       name,
-      style: { text: name, size: '14', color: white, bgcolor: blue },
+      style: { text: escapeVariableSyntax(name), size: '14', color: white, bgcolor: blue },
       steps: [{ down: [{ actionId: 'preset', options: { name } }], up: [] }],
       feedbacks: [
         {
