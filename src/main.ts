@@ -93,7 +93,7 @@ export default class ModuleInstance extends InstanceBase<ModuleSchema> {
 					}
 					res.resume()
 					resolve()
-				}
+				},
 			)
 			req.on('error', (e) => {
 				this.log('error', `POST /api/${path} failed: ${e.message}`)
@@ -141,7 +141,7 @@ export default class ModuleInstance extends InstanceBase<ModuleSchema> {
 					'factor_active',
 					'preset_active',
 					'confidence_above',
-					'beat_one'
+					'beat_one',
 				)
 			} catch (err) {
 				this.log('warn', `SSE parse error: ${err}`)

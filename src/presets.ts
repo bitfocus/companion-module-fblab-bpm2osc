@@ -33,7 +33,11 @@ const BASE_PRESETS: CompanionPresetDefinitions<ModuleSchema> = {
 		steps: [{ down: [{ actionId: 'lock', options: {} }], up: [] }],
 		feedbacks: [
 			{ feedbackId: 'locked', options: {}, style: { bgcolor: red, text: '🔒 LOCK' } },
-			{ feedbackId: 'auto_locked', options: {}, style: { bgcolor: blue, text: '🔒 AUTO', color: combineRgb(233, 69, 96) } },
+			{
+				feedbackId: 'auto_locked',
+				options: {},
+				style: { bgcolor: blue, text: '🔒 AUTO', color: combineRgb(233, 69, 96) },
+			},
 		],
 	},
 	div2: {
