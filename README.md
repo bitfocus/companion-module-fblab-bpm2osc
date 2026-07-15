@@ -1,25 +1,37 @@
-# companion-module-bpm2osc
+# companion-module-fblab-bpm2osc
 
 [Bitfocus Companion](https://bitfocus.io/companion) module for **BPM2OSC** — real-time BPM detection control and monitoring from your Companion surface.
 
 Connects to the BPM2OSC web server via SSE (Server-Sent Events) and REST API. State updates arrive at up to 50 Hz; all controls respond immediately.
+
+See [HELP.md](./companion/HELP.md) and [LICENSE](./LICENSE).
 
 ---
 
 ## Requirements
 
 - **BPM2OSC** v2.6.3 or later (web server must be enabled in Settings → Web Server)
-- **Bitfocus Companion** v4.3
-- Node.js 18+ (handled automatically by Companion)
+- **Bitfocus Companion** v4.3+
+- Node.js 22+ (handled automatically by Companion)
 
 ---
 
-## Installation
+## Getting started (development)
 
-1. Copy the `companion-module-bpm2osc/` folder into your Companion `modules/` directory.
-2. Restart Companion.
-3. Add a new connection: search for **BPM2OSC**.
-4. Set **Host / IP** and **Port** to match the BPM2OSC web server settings (default: `127.0.0.1 : 5000`).
+Executing a `yarn` command should perform all necessary steps to develop the module, if it does not then follow the steps below.
+
+The module can be built once with `yarn build`. This should be enough to get the module to be loadable by Companion.
+
+While developing the module, use `yarn dev` to run the compiler in watch mode and recompile on change.
+
+To produce a packaged `.tgz` for distribution, run `yarn package`.
+
+---
+
+## Installation (end user)
+
+1. Add a new connection in Companion: search for **BPM2OSC**.
+2. Set **Host / IP** and **Port** to match the BPM2OSC web server settings (default: `127.0.0.1 : 5000`).
 
 The module connects automatically. The status indicator turns green when the SSE stream is live.
 
@@ -52,7 +64,7 @@ The module connects automatically. The status indicator turns green when the SSE
 
 ## Variables
 
-Reference in button labels as `$(bpm2osc:<id>)`.
+Reference in button labels as `$(fblab-bpm2osc:<id>)`.
 
 | Variable | ID | Example value |
 |----------|----|---------------|
@@ -66,8 +78,8 @@ Reference in button labels as `$(bpm2osc:<id>)`.
 | Current Beat in Bar | `bar_beat` | `1` – `4` / `—` |
 | Octave Fix Badge | `fix` | `÷2` / `×2` / `4:3` / `` |
 
-`bpm` shows `--.-` when the engine has no confident reading (silence, speech, or low confidence).  
-`bar_beat` counts 1–4 within each bar; `—` when the engine is not running.  
+`bpm` shows `--.-` when the engine has no confident reading (silence, speech, or low confidence).
+`bar_beat` counts 1–4 within each bar; `—` when the engine is not running.
 `fix` reflects the active octave correction applied internally by the engine.
 
 ---
@@ -84,6 +96,7 @@ All feedbacks are **boolean** (highlight the button when the condition is true).
 | BPM Auto-Locked | `auto_locked` | Blue bg / pink text | Auto-lock is active (not manual) |
 | BPM Factor Active | `factor_active` | Orange bg | A ÷2 or ×2 factor is applied |
 | Specific Preset Active | `preset_active` | Blue bg / teal text | The named preset is currently selected |
+| Beat 1 (downbeat) | `beat_one` | Red bg | Current beat in bar is 1 |
 | Confidence Above Threshold | `confidence_above` | Green bg | Detection confidence ≥ threshold (default 70%) |
 
 `auto_locked` is true only when the engine auto-froze BPM due to low confidence, and the manual lock is off.
@@ -92,13 +105,13 @@ All feedbacks are **boolean** (highlight the button when the condition is true).
 
 ## Built-in presets
 
-Ready-made buttons available under **BPM2OSC** in the Companion preset panel.
+Ready-made buttons available under **BPM2OSC** in the Companion preset panel, plus one auto-generated button per BPM2OSC preset (Section **Presets**).
 
 ### Controls
 
 | Preset | Function |
 |--------|----------|
-| Start / Stop | Toggle engine; shows current BPM; green when running, dark red when stopped |
+| Start / Stop | Toggle engine; green when running, dark red when stopped |
 | Resync Beat | Send resync pulse |
 | Lock BPM | Toggle manual lock; shows 🔒 LOCK when locked, 🔒 AUTO when auto-locked |
 | BPM ÷2 | Halve tempo; highlights red when any factor is active |
@@ -109,20 +122,20 @@ Ready-made buttons available under **BPM2OSC** in the Companion preset panel.
 
 | Preset | Shows |
 |--------|-------|
-| BPM Display | `$(bpm2osc:bpm)` + `$(bpm2osc:factor)`; dark green bg when running |
-| Confidence | `$(bpm2osc:confidence)`; green bg when ≥ 70% |
-| Active Preset | `$(bpm2osc:preset)` |
-| Bar Beat Counter | `$(bpm2osc:bar_beat)`; tap also sends resync |
+| BPM Display | `$(fblab-bpm2osc:bpm)` + `$(fblab-bpm2osc:factor)`; dark green bg when running |
+| Confidence | `$(fblab-bpm2osc:confidence)`; green bg when ≥ 70% |
+| Active Preset | `$(fblab-bpm2osc:preset)` |
+| Bar Beat Counter | `$(fblab-bpm2osc:bar_beat)`; tap also sends resync |
 
 ---
 
 ## How it works
 
-The module opens a persistent SSE connection to `/api/stream` on the BPM2OSC web server.  
-The server pushes a full JSON state object at up to 50 Hz; the module updates all variables and re-evaluates all feedbacks on every message.  
+The module opens a persistent SSE connection to `/api/stream` on the BPM2OSC web server.
+The server pushes a full JSON state object at up to 50 Hz; the module updates all variables and re-evaluates all feedbacks on every message.
 On connection loss the module retries automatically every 3 seconds and sets the Companion status to **Connection Failure** until the stream is restored.
 
-Control actions are fired as HTTP POST requests to `/api/<command>` and return immediately.
+Control actions are fired as HTTP POST requests to `/api/<command>` and return immediately (5 s timeout).
 
 ---
 
@@ -130,14 +143,17 @@ Control actions are fired as HTTP POST requests to `/api/<command>` and return i
 
 ```
 src/
-  main.ts       — InstanceBase subclass, SSE connection, config
+  main.ts       — InstanceBase subclass, SSE connection
+  config.ts     — module config type and config fields
   actions.ts    — action definitions
   feedbacks.ts  — feedback definitions
   variables.ts  — variable definitions and update logic
   presets.ts    — built-in preset definitions and section structure
-  types.ts      — BPM2OSCState interface and Config type
+  types.ts      — BPM2OSC server state (BPM2OSCState) type
+  upgrades.ts   — Companion upgrade scripts
 companion/
   manifest.json — Companion module manifest
+  HELP.md       — in-app help shown to users
 ```
 
 ---

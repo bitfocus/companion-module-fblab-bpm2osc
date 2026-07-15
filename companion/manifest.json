@@ -1,23 +1,23 @@
 {
-  "id": "bpm2osc",
+  "$schema": "../node_modules/@companion-module/base/assets/manifest.schema.json",
+  "type": "connection",
+  "id": "fblab-bpm2osc",
   "name": "BPM2OSC",
   "shortname": "BPM2OSC",
   "description": "Real-time BPM detection — control and monitor BPM2OSC via Bitfocus Companion.",
   "version": "1.0.1",
-  "category": "utility",
-  "manufacturer": "FBLab.it",
-  "products": ["BPM2OSC"],
-  "keywords": ["bpm", "audio", "beat", "music", "osc", "tempo"],
-  "legacyIds": [],
   "license": "MIT",
-  "repository": "https://github.com/djbx83/companion-module-bpm2osc",
-  "bugs": "https://github.com/djbx83/companion-module-bpm2osc/issues",
+  "repository": "git+https://github.com/bitfocus/companion-module-fblab-bpm2osc.git",
+  "bugs": "https://github.com/bitfocus/companion-module-fblab-bpm2osc/issues",
   "maintainers": [{ "name": "Fabrizio Borelli", "email": "info@fblab.it" }],
   "runtime": {
     "type": "node22",
     "api": "nodejs-ipc",
-    "apiVersion": "1.14.1",
-    "entrypoint": "../pkg/main.js"
+    "apiVersion": "2.0.4",
+    "entrypoint": "../dist/main.js"
   },
-  "isPrerelease": false
+  "legacyIds": ["bpm2osc"],
+  "manufacturer": "FBLab.it",
+  "products": ["BPM2OSC"],
+  "keywords": ["bpm", "audio", "beat", "music", "osc", "tempo"]
 }

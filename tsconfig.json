@@ -1,18 +1,8 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "Node16",
-    "moduleResolution": "node16",
-    "lib": ["ES2022"],
-    "outDir": "dist",
-    "rootDir": "src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "sourceMap": true
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+	"extends": "./tsconfig.build.json",
+	"include": ["src/**/*.ts"],
+	"exclude": ["node_modules/**"],
+	"compilerOptions": {
+		"types": ["node" /* , "jest" ] // uncomment this if using jest */]
+	}
 }

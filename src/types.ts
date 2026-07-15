@@ -1,8 +1,3 @@
-export interface Config {
-  host: string
-  port: number
-}
-
 export interface BPM2OSCState {
   running: boolean
   bpm: number | null
